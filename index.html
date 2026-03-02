@@ -27,23 +27,32 @@
 
         .header-top {
             width: 100%; display: flex; justify-content: space-around;
-            padding: 20px 0; background: rgba(0,0,0,0.5); font-size: 1.8rem; color: #ffca28;
+            padding: 5px 0; background: rgba(0,0,0,0.3); font-size: 1.8rem; color: #ffca28;
+                     backdrop-filter: blur(8px); 
+                 -webkit-backdrop-filter: blur(12px); /* لدعم متصفحات آبل */
+
         }
 
         .current-time-large { font-size: 5rem; color: #fff; font-weight: bold; }
 
         .countdown-container { 
-            width: 55%; background: rgba(0,0,0,0.3); 
-            padding: 30px 0; text-align: center; 
-            margin: 15px 0; border-radius: 20px; border: 1px solid rgba(255,202,40,0.6);
+            width: 55%; background: rgba(0,0,0,0.3);
+            padding: 5px 0; text-align: center; 
+            margin: 15px 0; border-radius: 20px; border: 1px solid rgba(255,202,40,0.6); 
+                     /* إضافة تأثير التغبيش (Blur) هنا */
+                     backdrop-filter: blur(8px); 
+                 -webkit-backdrop-filter: blur(12px); /* لدعم متصفحات آبل */
         }
 
-        .countdown-time { font-size: 7rem; font-weight: bold; color: #ffca28; font-family: sans-serif; } /* وقت الصلاة في المستطيل */
-        .swedish-text { display: block; font-size: 0.45em; color: #aaa; margin-top: 4px; }
+        .countdown-time { font-size: 5rem; font-weight: bold; color: #ffca28; font-family: sans-serif; } /* وقت الصلاة في المستطيل */
+        .swedish-text { display: block; font-size: 0.65em; color: #969fa3; margin-top: 4px; }
 
         .prayer-table {
-            width: 70%; border-collapse: collapse; font-size: 1.8rem; table-layout: fixed;
-            background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden;
+            width: 65%; border-collapse: collapse; font-size: 1.5rem; table-layout: fixed;
+            background: rgba(0,0,0,0.3); border-radius: 15px; overflow: hidden; 
+                     backdrop-filter: blur(8px); 
+                 -webkit-backdrop-filter: blur(12px); /* لدعم متصفحات آبل */
+
                
         }
 
@@ -55,13 +64,19 @@
             text-align: center; 
         }
         .prayer-table td { 
-            padding: 12px; 
+            padding: 2px; 
             text-align: center; 
             border-bottom: 1px solid #333; 
         }
         .active-row { 
             background-color: rgba(255, 202, 40, 0.4) !important; 
             font-weight: bold; 
+                      /* إضافة إشعاع ذهبي حول الصف النشط */
+                      box-shadow: inset 0 0 15px rgba(255, 202, 40, 1.5), 0 0 10px rgba(255, 202, 40, 1.3);
+                   position: relative;
+                   z-index: 1;
+                      
+
         }
         
         /* تأثير الوميض */
@@ -80,7 +95,7 @@
             text-align: center;
         }
         .bottom-center-logo img {
-            width: 1200px;
+            width: 850px;
             height: auto;
             opacity: 0.8;
             filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
