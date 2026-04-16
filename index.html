@@ -4,163 +4,258 @@
     <meta charset="UTF-8">
     <title>مواقيت مسجد الخليل</title>
     <style>
-        body { 
-            margin: 0; padding: 0; 
-            background: url('3.png') no-repeat center center fixed;
-                      background-size: cover;
-            color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; 
-            height: 100vh; overflow: hidden; 
-            display: flex; flex-direction: column; align-items: center; 
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background: #0a2a2a;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        /* حاوية رئيسية بنسبة 9:16 */
+        .portrait-wrapper {
+            position: relative;
+            width: min(100vw, calc(100vh * 9 / 16));
+            height: 100vh;
+            background: url('3.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
         }
 
         #prayer-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #004d00; z-index: 100; display: none; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #004d00; z-index: 100; display: none;
             flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
 
-        .logo-container {
-            position: fixed; bottom: 40px; right: 60px; text-align: center; z-index: 10;
+        .top-left-logo {
+            position: absolute;
+            bottom: 10px; left: 10px; z-index: 10;
         }
-        .logo-img { width: 300px; filter: drop-shadow(0 0 10px rgba(0,0,0,1.5)); }
-        .logo-text { display: block; font-size: 1rem; color: #ffca28; margin-top: 5px; }
+        .top-left-logo img { width: 70px; height: auto; filter: drop-shadow(0 0 8px rgba(0,0,0,0.7)); }
 
+        /* ===== الهيدر ===== */
         .header-top {
-            width: 100%; display: flex; justify-content: space-around;
-            padding: 5px 0; background: rgba(0,0,0,0.3); font-size: 1.8rem; color: #ffca28;
-                     backdrop-filter: blur(8px); 
-                 -webkit-backdrop-filter: blur(12px); /* لدعم متصفحات آبل */
-
+            width: 92%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0 12px;
+            color: #fff;
+            background: transparent;
+            position: relative;
+            margin-top: 8px;
         }
-
-        .current-time-large { font-size: 5rem; color: #fff; font-weight: bold; }
-
-        .countdown-container { 
-            width: 55%; background: rgba(0,0,0,0.3);
-            padding: 5px 0; text-align: center; 
-            margin: 15px 0; border-radius: 20px; border: 1px solid rgba(255,202,40,0.6); 
-                     /* إضافة تأثير التغبيش (Blur) هنا */
-                     backdrop-filter: blur(8px); 
-                 -webkit-backdrop-filter: blur(12px); /* لدعم متصفحات آبل */
+        .header-top::after {
+            content: "";
+            position: absolute;
+            bottom: 0; left: 5%; width: 90%; height: 1.5px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
         }
+        #clock { font-size: 3rem; font-weight: 700; text-align: center; line-height: 1; }
+        #date-ar, #date-se { font-size: 1rem; opacity: 0.9; }
+        #date-hijri, #date-hijri-se { font-size: 0.85rem; color: #ffca28; margin-top: 4px; }
+        .date-col { display: flex; flex-direction: column; align-items: center; }
 
-        .countdown-time { font-size: 5rem; font-weight: bold; color: #ffca28; font-family: sans-serif; } /* وقت الصلاة في المستطيل */
-        .swedish-text { display: block; font-size: 0.65em; color: #969fa3; margin-top: 4px; }
-
-        .prayer-table {
-            width: 65%; border-collapse: collapse; font-size: 1.5rem; table-layout: fixed;
-            background: rgba(0,0,0,0.3); border-radius: 15px; overflow: hidden; 
-                     backdrop-filter: blur(8px); 
-                 -webkit-backdrop-filter: blur(12px); /* لدعم متصفحات آبل */
-
-               
-        }
-
-/* تنسيقات الجدول */
-        .prayer-table th { 
-            background-color: rgba(255,202,40,0.15); 
-            color: #ffca28; 
-            padding: 15px; 
-            text-align: center; 
-        }
-        .prayer-table td { 
-            padding: 2px; 
-            text-align: center; 
-            border-bottom: 1px solid #333; 
-        }
-        .active-row { 
-            background-color: rgba(255, 202, 40, 0.4) !important; 
-            font-weight: bold; 
-                      /* إضافة إشعاع ذهبي حول الصف النشط */
-                      box-shadow: inset 0 0 15px rgba(255, 202, 40, 1.5), 0 0 10px rgba(255, 202, 40, 1.3);
-                   position: relative;
-                   z-index: 1;
-                      
-
-        }
-        
-        /* تأثير الوميض */
-        .iqama-blink { animation: blinker 2.8s infinite; }
-        @keyframes blinker { 
-            50% { background-color: rgba(0, 0, 0, 0.7); } 
-        } /* تأكد من وجود هذا القوس */
-
-        /* صورة أسفل منتصف الشاشة */
-        .bottom-center-logo {
-            position: fixed;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
+        /* ===== العداد التنازلي ===== */
+        .countdown-container {
+            background: rgba(25, 35, 40, 0.55);
+            border-radius: 16px;
+            padding: 14px 20px;
             text-align: center;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            width: 92%;
+            margin-top: 12px;
+            transition: all 0.5s ease;
         }
-        .bottom-center-logo img {
-            width: 850px;
-            height: auto;
-            opacity: 0.8;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-        } /* تأكد من وجود هذا القوس */
+        #timer-label { font-size: 1.05rem; color: #ccc; }
+        .countdown-time {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #ffca28;
+            font-family: sans-serif;
+            text-shadow: 0 0 20px rgba(255,202,40,0.3);
+            line-height: 1.1;
+        }
+        #timer-prayer-name { font-size: 2rem; margin-top: 4px; }
+        .swedish-text { display: block; font-size: 0.6em; color: #969fa3; margin-top: 2px; }
 
-        /* صورة أسفل يسار الشاشة */
-        .bottom-left-logo {
-            position: fixed;
-            bottom: 40px;
-            left: 60px;
-            z-index: 5;
+        /* ===== بطاقات الصلاة ===== */
+        .prayer-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 92%;
+            margin-top: 12px;
+            padding-bottom: 12px;
+            /* لا flex:1 حتى لا تمتد الكروت للأسفل */
         }
-        .bottom-left-logo img {
-            width: 300px;
-            height: auto;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,1.5));
+        .prayer-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .prayer-card {
+            background: rgba(25, 35, 40, 0.5);
+            border-radius: 14px;
+            padding: 10px 6px;
+            flex: 1;
+            /* نسبة العرض إلى الارتفاع 1:1 لجعلها مربعة */
+            aspect-ratio: 1 / 1;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.4s ease;
+        }
+        .prayer-name { color: #fff; font-size: 1.25rem; font-weight: bold; margin-bottom: 2px; }
+        .swedish-name { color: #aaa; font-size: 0.75rem; margin-bottom: 6px; text-transform: capitalize; }
+        .prayer-time { color: #fff; font-size: 1.15rem; font-weight: bold; margin-bottom: 8px; }
+
+        .iqama-box {
+            background: rgba(255, 202, 40, 0.1);
+            border: 1px solid rgba(255, 202, 40, 0.3);
+            padding: 5px 4px;
+            border-radius: 8px;
+            margin-top: auto;
+        }
+        .iqama-label { color: #ffca28; font-size: 0.6rem; display: block; opacity: 0.8; }
+        .iqama-time { color: #ffca28; font-size: 1rem; font-weight: bold; }
+
+        .active-card {
+            border: 2px solid #ffca28 !important;
+            box-shadow: 0 0 20px rgba(255, 202, 40, 0.5);
+            transform: translateY(-4px);
+            background: rgba(40, 50, 55, 0.7) !important;
+        }
+
+        .iqama-blink { animation: blinker 2.8s infinite; }
+        @keyframes blinker { 50% { background-color: rgba(1, 0, 0, 0.5); } }
+
+        .prayer-table th {
+            background-color: rgba(255,202,40,0.15);
+            color: #ffca28; padding: 8px; text-align: center;
+        }
+        .prayer-table td { padding: 2px; text-align: center; border-bottom: 1px solid #333; }
+        .active-row {
+            background-color: rgba(255, 202, 40, 0.4) !important;
+            font-weight: bold;
+            box-shadow: inset 0 0 15px rgba(255,202,40,1.5), 0 0 10px rgba(255,202,40,1.3);
+            position: relative; z-index: 1;
         }
     </style>
 </head>
 <body>
+<div class="portrait-wrapper">
+
+    <div class="top-left-logo">
+        <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+    </div>
 
     <div id="prayer-overlay">
-        <h1 style="font-size: 6rem; margin: 0;">أقيمت الصلاة</h1>
-        <p style="font-size: 3rem;">الرجاء إغلاق الهاتف </p>
-        <p style="font-size: 1.5rem; color: #ccc;">Stäng av mobilen</p>
+        <h1 style="font-size: 4rem; margin: 0; text-align: center;">أقيمت الصلاة</h1>
+        <p style="font-size: 2rem; text-align: center;">الرجاء إغلاق الهاتف</p>
+        <p style="font-size: 1.2rem; color: #ccc; text-align: center;">Stäng av mobilen</p>
     </div>
 
     <div class="header-top">
-        <div id="date-ar">---</div>
-        <div class="current-time-large" id="clock">00:00</div>
-        <div id="date-en">---</div>
+        <div class="date-col">
+            <div id="date-ar">---</div>
+            <div id="date-hijri">---</div>
+        </div>
+        <div id="clock">00:00</div>
+        <div class="date-col">
+            <div id="date-se">---</div>
+            <div id="date-hijri-se">---</div>
+        </div>
     </div>
 
     <div class="countdown-container" id="timer-box">
-        <div id="timer-label" style="font-size: 1.8rem; color: #ccc;">
-            المتبقي للأذان <span class="swedish-text">Tid till Adhan</span>
-        </div>
+        <div id="timer-label">المتبقي للأذان <span class="swedish-text">Tid till Adhan</span></div>
         <div class="countdown-time" id="timer">00:00:00</div>
-        <div id="timer-prayer-name" style="font-size: 3rem;">---</div>
+        <div id="timer-prayer-name" style="font-size: 2rem; text-align: center;">---</div>
     </div>
 
-    <table class="prayer-table">
-        <thead>
-            <tr>
-                <th>الصلاة <span class="swedish-text">Bön</span></th>
-                <th>الإقامة <span class="swedish-text">Iqama</span></th>
-                <th>الوقت <span class="swedish-text">Tid</span></th>
-            </tr>
-        </thead>
-        <tbody id="prayer-rows"></tbody>
-    </table>
-
-    <div class="logo-container">
-        <img src="logo.png" class="logo-img" onerror="this.style.display='none'">
-        <span class="logo-text"></span>
+    <div class="prayer-cards-container" id="prayer-cards">
+        <div class="prayer-row">
+            <div class="prayer-card" id="card-fajr">
+                <div class="prayer-name">الفجر</div>
+                <div class="swedish-name">Fajr</div>
+                <div class="prayer-time" id="fajr-time">--:--</div>
+                <div class="iqama-box">
+                    <span class="iqama-label">الإقامة Iqama</span>
+                    <span class="iqama-time" id="fajr-iqama">--:--</span>
+                </div>
+            </div>
+            <div class="prayer-card" id="card-Shuruq">
+                <div class="prayer-name">الشروق</div>
+                <div class="swedish-name">Shuruq</div>
+                <div class="prayer-time" id="shuruq-time">--:--</div>
+            </div>
+            <div class="prayer-card" id="card-duhur">
+                <div class="prayer-name">الظهر</div>
+                <div class="swedish-name">Duhur</div>
+                <div class="prayer-time" id="duhur-time">--:--</div>
+                <div class="iqama-box">
+                    <span class="iqama-label">الإقامة Iqama</span>
+                    <span class="iqama-time" id="duhur-iqama">--:--</span>
+                </div>
+            </div>
+        </div>
+        <div class="prayer-row">
+            <div class="prayer-card" id="card-asr">
+                <div class="prayer-name">العصر</div>
+                <div class="swedish-name">Asr</div>
+                <div class="prayer-time" id="asr-time">--:--</div>
+                <div class="iqama-box">
+                    <span class="iqama-label">الإقامة Iqama</span>
+                    <span class="iqama-time" id="asr-iqama">--:--</span>
+                </div>
+            </div>
+            <div class="prayer-card" id="card-maghrib">
+                <div class="prayer-name">المغرب</div>
+                <div class="swedish-name">Maghrib</div>
+                <div class="prayer-time" id="maghrib-time">--:--</div>
+                <div class="iqama-box">
+                    <span class="iqama-label">الإقامة Iqama</span>
+                    <span class="iqama-time" id="maghrib-iqama">--:--</span>
+                </div>
+            </div>
+            <div class="prayer-card" id="card-ishâ">
+                <div class="prayer-name">العشاء</div>
+                <div class="swedish-name">Ishâ</div>
+                <div class="prayer-time" id="ishâ-time">--:--</div>
+                <div class="iqama-box">
+                    <span class="iqama-label">الإقامة Iqama</span>
+                    <span class="iqama-time" id="ishâ-iqama">--:--</span>
+                </div>
+            </div>
+        </div>
     </div>
-       <div class="bottom-center-logo">
-        <img src="4.png" alt="Logo">
-    </div>
 
-       <div class="bottom-left-logo">
-    <img src="5.png" alt="Left Logo">
-       </div>
+
+
+
+
+
+
 
     <script>
+
         // البيانات كما قدمتها مع تصحيح علامات التنصيص
         const prayerData = [
             {
@@ -260,7 +355,7 @@
    "Duhur": "12:07",
    "Asr": "14:46",
    "Maghrib": "17:32",
-   "Ishâ": "19:38"
+   "Ishâ": "21:21"
  },
  {
    "Datum": "2026-03-05 00:00:00",
@@ -3516,19 +3611,37 @@
 
         const iqamaOffsets = { Fajr: 10, Duhur: 10, Asr: 10, Maghrib: 5, Ishâ: 10 };
         const labels = { 
-            Fajr: {ar:"الفجر", sv:"Fajr"}, Shuruq: {ar:"الشروق", sv:"Soluppgång"}, 
-            Duhur: {ar:"الظهر", sv:"Dhuhr"}, Asr: {ar:"العصر", sv:"Asr"}, 
-            Maghrib: {ar:"المغرب", sv:"Maghrib"}, Ishâ: {ar:"العشاء", sv:"Isha"} 
+            Fajr: { ar: "الفجر", sv: "Fajr" }, 
+                      Shuruq: {ar:"الشروق", sv:"Shuruq"},
+            Duhur: { ar: "الظهر", sv: "Duhur" },
+            Asr: { ar: "العصر", sv: "Asr" },
+                      Maghrib: { ar: "المغرب", sv: "Maghrib" },
+                      Ishâ: { ar: "العشاء", sv: "Ishâ" }
         };
 
         let nextPrayerNameGlobal = "";
 
         function updateClock() {
             const now = new Date();
+
+            // 1. الوقت الحالي
             document.getElementById('clock').innerText = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-            const optionsAr = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('date-ar').innerText = now.toLocaleDateString('ar-EG-u-nu-latn', optionsAr);
-            document.getElementById('date-en').innerText = now.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            // 2. التاريخ الميلادي العربي والهجري العربي (الجهة اليمنى)
+                const optionsAr = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+                document.getElementById('date-ar').innerText = now.toLocaleDateString('ar-EG', optionsAr);
+    
+                const hijriOptionsAr = { calendar: 'islamic-umalqura', day: 'numeric', month: 'long', year: 'numeric' };
+                document.getElementById('date-hijri').innerText = now.toLocaleDateString('ar-SA-u-nu-latn', hijriOptionsAr);
+
+            // 3. التاريخ الميلادي السويدي (الجهة اليسرى)
+            let swedishDate = now.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('date-se').innerText = swedishDate.charAt(0).toUpperCase() + swedishDate.slice(1);
+
+            // 4. التاريخ الهجري باللغة السويدية (الجهة اليسرى تحت السويدي)
+            const hijriOptionsSe = { calendar: 'islamic-umalqura', day: 'numeric', month: 'long', year: 'numeric' };
+            let hijriSe = now.toLocaleDateString('sv-SE', hijriOptionsSe);
+            document.getElementById('date-hijri-se').innerText = hijriSe.charAt(0).toUpperCase() + hijriSe.slice(1);
         }
 
         // دالة لتحويل النص "12:09" وتاريخ "2026-02-16" إلى كائن وقت حقيقي
@@ -3547,21 +3660,57 @@
         function renderTable() {
             const times = getTodayData();
             if (!times) return;
-            const tbody = document.getElementById('prayer-rows');
-            tbody.innerHTML = "";
-            for (let key in labels) {
-                const row = document.createElement('tr');
-                if (labels[key].ar === nextPrayerNameGlobal) row.className = "active-row";
-                let iqama = (key === "Shuruq") ? "-" : (iqamaOffsets[key] + " min");
-                row.innerHTML = `<td>${labels[key].ar}<span class="swedish-text">${labels[key].sv}</span></td><td>${iqama}</td><td>${times[key]}</td>`;
-                tbody.appendChild(row);
+
+             // 1. تحديث أوقات الأذان والإقامة في كل مربع
+           for (let key in labels) {
+                // تحديث وقت الأذان (مثلاً: fajr-time)
+               const timeElement = document.getElementById(`${key.toLowerCase()}-time`);
+               if (timeElement) {
+                 timeElement.innerText = times[key];
+              }
+
+                // تحديث وقت الإقامة (مثلاً: fajr-iqama)
+              const iqamaElement = document.getElementById(`${key.toLowerCase()}-iqama`);
+              if (iqamaElement) {
+                    // الشروق ليس له إقامة
+                  if (key === "Shuruq") {
+                     iqamaElement.innerText = "-";
+                  } else {
+                        // استخدام دالة الحساب لإضافة الدقائق لوقت الأذان
+                      iqamaElement.innerText = calculateIqamaTime(times[key], iqamaOffsets[key]);
+                  }
+              }
+
+              // 2. تحديث المربع النشط (Active Card)
+             const cardElement = document.getElementById(`card-${key.toLowerCase()}`);
+             if (cardElement) {
+                  // إزالة الكلاس القديم أولاً
+             cardElement.classList.remove('active-card');
+                 // إذا كان اسم الصلاة يطابق الصلاة القادمة عالمياً
+               if (labels[key].ar === nextPrayerNameGlobal) {
+                  cardElement.classList.add('active-card');
+                }
             }
         }
+    }
+
+        // دالة إضافية ضرورية لحساب وقت الإقامة بدقة
+        function calculateIqamaTime(timeStr, offsetMin) {
+            if (!timeStr || timeStr === "-") return "-";
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours);
+            date.setMinutes(minutes + offsetMin);
+            return date.getHours().toString().padStart(2, '0') + ":" + 
+                   date.getMinutes().toString().padStart(2, '0');
+        }
+        
 
         function updateTimer() {
             const now = new Date();
             let todayData = getTodayData();
             if (!todayData) return;
+
 
             const prayers = [
                 {n: labels.Fajr.ar, t: todayData.Fajr, i: iqamaOffsets.Fajr, sv: labels.Fajr.sv, data: todayData},
@@ -3612,6 +3761,30 @@
 
         setInterval(() => { updateClock(); updateTimer(); renderTable(); }, 1000);
         updateClock(); updateTimer(); renderTable();
+
+
     </script>
+
+    <!-- ===== Firebase: تحديث النصوص عن بُعد ===== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey:            "AIzaSyBuVwm5PzSzpDicDfGjo6KXTiiLQ8rb9NQ",
+            authDomain:        "masjid-screen-7fa3a.firebaseapp.com",
+            databaseURL:       "https://masjid-screen-7fa3a-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId:         "masjid-screen-7fa3a",
+            storageBucket:     "masjid-screen-7fa3a.firebasestorage.app",
+            messagingSenderId: "973750176364",
+            appId:             "1:973750176364:web:616ad4a46b074e2ea66649"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db  = getDatabase(app);
+
+
+    </script>
+</div><!-- end portrait-wrapper -->
 </body>
 </html>
