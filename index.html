@@ -613,7 +613,7 @@
         function isSummerPeriod(date) {
             const m = date.getMonth() + 1; // 1-12
             const d = date.getDate();
-            const afterApr24 = (m > 4) || (m === 4 && d >= 24);
+            const afterApr24 = (m > 4) || (m === 4 && d >= 23);
             const beforeAug15 = (m < 8) || (m === 8 && d <= 15);
             return afterApr24 && beforeAug15;
         }
@@ -639,7 +639,7 @@
 
             return Object.assign({}, base, {
                 'Ishâ': addMinutes(base.Maghrib, 60),
-                'Fajr': addMinutes(base.Shuruq, 90)
+                'Fajr': addMinutes(base.Shuruq, -90)
             });
         }
 
@@ -722,15 +722,21 @@
         // تحديث البطاقات
         // ============================================================
 
+        // تحويل مفتاح الصلاة إلى ID صحيح في HTML (يعالج الحرف الخاص â)
+        function keyToId(key) {
+            return key.replace('â', 'a').toLowerCase();
+        }
+
         function renderTable() {
-            const times   = getAdjustedTodayData();   // ← مُعدَّل
-            const offsets = getIqamaOffsets();          // ← مُعدَّل
+            const times   = getAdjustedTodayData();
+            const offsets = getIqamaOffsets();
             if (!times) return;
 
             for (let key in labels) {
-                const timeEl  = document.getElementById(`${key.toLowerCase()}-time`);
-                const iqamaEl = document.getElementById(`${key.toLowerCase()}-iqama`);
-                const cardEl  = document.getElementById(`card-${key.toLowerCase()}`);
+                const id      = keyToId(key);
+                const timeEl  = document.getElementById(`${id}-time`);
+                const iqamaEl = document.getElementById(`${id}-iqama`);
+                const cardEl  = document.getElementById(`card-${id}`);
 
                 if (timeEl)  timeEl.innerText = times[key] || '--:--';
 
@@ -789,7 +795,7 @@
                     const adjTmr = isSummerPeriod(tmr)
                         ? Object.assign({}, tData, {
                             'Ishâ': addMinutes(tData.Maghrib, 60),
-                            'Fajr': addMinutes(tData.Shuruq, 90)
+                            'Fajr': addMinutes(tData.Shuruq, -90)
                           })
                         : tData;
                     target = parseDateTime(adjTmr, adjTmr.Fajr);
