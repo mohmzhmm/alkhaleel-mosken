@@ -8,16 +8,14 @@
 
         html, body {
             margin: 0; padding: 0;
-            width: 100%; height: 100%;
+            width: 100vw; height: 100vh;
             background: #0a2a2a;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             font-family: 'Segoe UI', Tahoma, sans-serif;
             color: #fff;
             overflow: hidden;
-            width: 100vw;
-            height: 100vh;
         }
 
         .portrait-wrapper {
@@ -609,20 +607,14 @@
             {"Datum":"2027-02-28 00:00:00","Fajr":"04:42","Shuruq":"06:55","Duhur":"12:08","Asr":"14:39","Maghrib":"17:22","Ishâ":"19:27"}
         ];
 
-        // ============================================================
-        // ★ دوال الفترة الصيفية (24 أبريل → 15 أغسطس)
-        // ============================================================
-
-        /** هل التاريخ المعطى يقع ضمن فترة الصيف؟ */
         function isSummerPeriod(date) {
-            const m = date.getMonth() + 1; // 1-12
+            const m = date.getMonth() + 1;
             const d = date.getDate();
             const afterApr24 = (m > 4) || (m === 4 && d >= 23);
             const beforeAug15 = (m < 8) || (m === 8 && d <= 15);
             return afterApr24 && beforeAug15;
         }
 
-        /** أضف دقائق إلى نص وقت "HH:MM" وأرجع نصاً جديداً */
         function addMinutes(timeStr, mins) {
             const [h, m] = timeStr.split(':').map(Number);
             const total = h * 60 + m + mins;
@@ -630,37 +622,22 @@
                    String(total % 60).padStart(2, '0');
         }
 
-        /**
-         * أرجع بيانات اليوم مع تطبيق قواعد الصيف إن لزم:
-         *   - العشاء = المغرب + 60 دقيقة
-         *   - الفجر  = الشروق + 90 دقيقة
-         */
         function getAdjustedTodayData() {
             const now  = new Date();
             const base = getTodayData();
             if (!base) return null;
             if (!isSummerPeriod(now)) return base;
-
             return Object.assign({}, base, {
                 'Ishâ': addMinutes(base.Maghrib, 60),
                 'Fajr': addMinutes(base.Shuruq, -90)
             });
         }
 
-        /**
-         * أوفست الإقامة حسب الفترة:
-         *   الصيف  → فجر+15، مغرب+0، عشاء+0
-         *   عادي  → فجر+10، مغرب+5،  عشاء+10
-         */
         function getIqamaOffsets() {
             return isSummerPeriod(new Date())
                 ? { Fajr: 15, Duhur: 10, Asr: 10, Maghrib: 5, 'Ishâ': 5 }
                 : { Fajr: 10, Duhur: 10, Asr: 10, Maghrib: 5, 'Ishâ': 10 };
         }
-
-        // ============================================================
-        // دوال مساعدة
-        // ============================================================
 
         const labels = {
             Fajr:    { ar: "الفجر",    sv: "Fajr" },
@@ -695,10 +672,6 @@
             return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
         }
 
-        // ============================================================
-        // تحديث الساعة والتاريخ
-        // ============================================================
-
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText =
@@ -722,11 +695,6 @@
                 hijSv.charAt(0).toUpperCase() + hijSv.slice(1);
         }
 
-        // ============================================================
-        // تحديث البطاقات
-        // ============================================================
-
-        // تحويل مفتاح الصلاة إلى ID صحيح في HTML (يعالج الحرف الخاص â)
         function keyToId(key) {
             return key.replace('â', 'a').toLowerCase();
         }
@@ -756,14 +724,10 @@
             }
         }
 
-        // ============================================================
-        // العداد التنازلي
-        // ============================================================
-
         function updateTimer() {
             const now     = new Date();
-            const todayData = getAdjustedTodayData();   // ← مُعدَّل
-            const offsets   = getIqamaOffsets();          // ← مُعدَّل
+            const todayData = getAdjustedTodayData();
+            const offsets   = getIqamaOffsets();
             if (!todayData) return;
 
             const prayers = [
@@ -787,7 +751,6 @@
                 if (now < iTime) { target = iTime; nameAr = p.n; nameSv = p.sv; mode = "اقامة"; break; }
             }
 
-            // إذا انتهت صلوات اليوم → فجر الغد
             if (!target) {
                 const tmr = new Date(); tmr.setDate(now.getDate() + 1);
                 const tStr = tmr.getFullYear() + "-" +
@@ -795,7 +758,6 @@
                              String(tmr.getDate()).padStart(2,'0') + " 00:00:00";
                 const tData = prayerData.find(d => d.Datum === tStr);
                 if (tData) {
-                    // تطبيق قواعد الصيف على بيانات الغد أيضاً
                     const adjTmr = isSummerPeriod(tmr)
                         ? Object.assign({}, tData, {
                             'Ishâ': addMinutes(tData.Maghrib, 60),
@@ -827,7 +789,6 @@
 
         setInterval(() => { updateClock(); updateTimer(); renderTable(); }, 1000);
         updateClock(); updateTimer(); renderTable();
-
     </script>
 
     <script type="module">
