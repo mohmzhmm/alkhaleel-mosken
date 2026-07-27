@@ -66,17 +66,21 @@
         #date-hijri, #date-hijri-se { font-size: 0.85rem; color: #ffca28; margin-top: 4px; }
         .date-col { display: flex; flex-direction: column; align-items: center; }
 
+        /* NOTE: backdrop-filter (blur) removed for performance on low-power screens.
+           It was forcing the GPU to recomposite a blurred layer every second
+           (since the clock/timer text inside changes every second), which is
+           very expensive and caused the page to slow down / freeze over time.
+           Replaced with a plain, slightly darker semi-transparent background
+           to keep a similar look without the cost. */
         .countdown-container {
-            background: rgba(25, 35, 40, 0.55);
+            background: rgba(15, 22, 26, 0.75);
             border-radius: 16px;
             padding: 14px 20px;
             text-align: center;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             width: 92%;
             margin-top: 12px;
-            transition: all 0.5s ease;
+            transition: background-color 0.5s ease;
         }
         #timer-label { font-size: 1.05rem; color: #ccc; }
         .countdown-time {
@@ -104,19 +108,17 @@
             width: 100%;
         }
         .prayer-card {
-            background: rgba(25, 35, 40, 0.5);
+            background: rgba(15, 22, 26, 0.7);
             border-radius: 14px;
             padding: 10px 6px;
             flex: 1;
             aspect-ratio: 1 / 1;
             text-align: center;
             border: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transition: all 0.4s ease;
+            transition: background-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
         }
         .prayer-name { color: #fff; font-size: 1.25rem; font-weight: bold; margin-bottom: 2px; }
         .swedish-name { color: #aaa; font-size: 0.75rem; margin-bottom: 6px; text-transform: capitalize; }
@@ -136,7 +138,7 @@
             border: 2px solid #ffca28 !important;
             box-shadow: 0 0 20px rgba(255, 202, 40, 0.5);
             transform: translateY(-4px);
-            background: rgba(40, 50, 55, 0.7) !important;
+            background: rgba(40, 50, 55, 0.85) !important;
         }
 
         .iqama-blink { animation: blinker 2.8s infinite; }
@@ -672,27 +674,30 @@
             return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
         }
 
+        /* PERFORMANCE FIX: Intl.DateTimeFormat objects are expensive to construct
+           (especially with a non-Gregorian calendar like islamic-umalqura).
+           The old code called toLocaleDateString(...) fresh every second, which
+           creates a brand new formatter internally every single time. On a slow
+           device this adds up over hours and contributes to the freeze.
+           Here we build each formatter ONCE and just call .format(now) every tick. */
+        const fmtDateAr  = new Intl.DateTimeFormat('ar-EG', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+        const fmtHijriAr = new Intl.DateTimeFormat('ar-SA-u-nu-latn', { calendar:'islamic-umalqura', day:'numeric', month:'long', year:'numeric' });
+        const fmtDateSe  = new Intl.DateTimeFormat('sv-SE', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+        const fmtHijriSe = new Intl.DateTimeFormat('sv-SE', { calendar:'islamic-umalqura', day:'numeric', month:'long', year:'numeric' });
+        const fmtClock   = new Intl.DateTimeFormat('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false });
+
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').innerText =
-                now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false });
+            document.getElementById('clock').innerText = fmtClock.format(now);
 
-            const optAr = { weekday:'long', day:'numeric', month:'long', year:'numeric' };
-            document.getElementById('date-ar').innerText =
-                now.toLocaleDateString('ar-EG', optAr);
+            document.getElementById('date-ar').innerText = fmtDateAr.format(now);
+            document.getElementById('date-hijri').innerText = fmtHijriAr.format(now);
 
-            const optHijAr = { calendar:'islamic-umalqura', day:'numeric', month:'long', year:'numeric' };
-            document.getElementById('date-hijri').innerText =
-                now.toLocaleDateString('ar-SA-u-nu-latn', optHijAr);
-
-            let sv = now.toLocaleDateString('sv-SE',
-                { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+            let sv = fmtDateSe.format(now);
             document.getElementById('date-se').innerText = sv.charAt(0).toUpperCase() + sv.slice(1);
 
-            let hijSv = now.toLocaleDateString('sv-SE',
-                { calendar:'islamic-umalqura', day:'numeric', month:'long', year:'numeric' });
-            document.getElementById('date-hijri-se').innerText =
-                hijSv.charAt(0).toUpperCase() + hijSv.slice(1);
+            let hijSv = fmtHijriSe.format(now);
+            document.getElementById('date-hijri-se').innerText = hijSv.charAt(0).toUpperCase() + hijSv.slice(1);
         }
 
         function keyToId(key) {
@@ -789,6 +794,15 @@
 
         setInterval(() => { updateClock(); updateTimer(); renderTable(); }, 1000);
         updateClock(); updateTimer(); renderTable();
+
+        /* RELIABILITY FIX: auto-reload the page periodically.
+           On screens that run 24/7 for weeks, even small memory/GPU leaks
+           (fonts, layers, browser quirks) can eventually freeze the tab.
+           A full page reload every few hours is a cheap safety net that
+           guarantees the screen recovers on its own without anyone having
+           to walk over and restart it manually. Adjust RELOAD_HOURS as needed. */
+        const RELOAD_HOURS = 4;
+        setTimeout(() => { location.reload(); }, RELOAD_HOURS * 60 * 60 * 1000);
     </script>
 
     <script type="module">
