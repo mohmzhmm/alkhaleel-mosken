@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>مواقيت مسجد الخليل</title>
     <style>
+        :root { --logo-size:70px; --logo-x:10px; --logo-y:10px; --clock-font:48px; --date-font:16px; --countdown-font:80px; --countdown-label-font:17px; --next-prayer-font:32px; --prayer-name-font:20px; --swedish-name-font:12px; --prayer-time-font:18px; --iqama-label-font:10px; --iqama-time-font:16px; --header-offset:8px; --countdown-offset:12px; --cards-offset:12px; --cards-width:92%; --card-gap:8px; }
         * { box-sizing: border-box; }
 
         html, body {
@@ -40,9 +41,9 @@
 
         .top-left-logo {
             position: absolute;
-            bottom: 10px; left: 10px; z-index: 10;
+            bottom: var(--logo-y); left: var(--logo-x); z-index: 10;
         }
-        .top-left-logo img { width: 70px; height: auto; filter: drop-shadow(0 0 8px rgba(0,0,0,0.7)); }
+        .top-left-logo img { width: var(--logo-size); height: auto; filter: drop-shadow(0 0 8px rgba(0,0,0,0.7)); }
 
         .header-top {
             width: 92%;
@@ -53,7 +54,7 @@
             color: #fff;
             background: transparent;
             position: relative;
-            margin-top: 8px;
+            margin-top: var(--header-offset);
         }
         .header-top::after {
             content: "";
@@ -61,8 +62,8 @@
             bottom: 0; left: 5%; width: 90%; height: 1.5px;
             background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
         }
-        #clock { font-size: 3rem; font-weight: 700; text-align: center; line-height: 1; }
-        #date-ar, #date-se { font-size: 1rem; opacity: 0.9; }
+        #clock { font-size: var(--clock-font); font-weight: 700; text-align: center; line-height: 1; }
+        #date-ar, #date-se { font-size: var(--date-font); opacity: 0.9; }
         #date-hijri, #date-hijri-se { font-size: 0.85rem; color: #ffca28; margin-top: 4px; }
         .date-col { display: flex; flex-direction: column; align-items: center; }
 
@@ -78,33 +79,33 @@
             padding: 14px 20px;
             text-align: center;
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            width: 92%;
-            margin-top: 12px;
+            width: var(--cards-width);
+            margin-top: var(--countdown-offset);
             transition: background-color 0.5s ease;
         }
-        #timer-label { font-size: 1.05rem; color: #ccc; }
+        #timer-label { font-size: var(--countdown-label-font)!important; color: #ccc; }
         .countdown-time {
-            font-size: 5rem;
+            font-size: var(--countdown-font);
             font-weight: bold;
             color: #ffca28;
             font-family: sans-serif;
             text-shadow: 0 0 20px rgba(255,202,40,0.3);
             line-height: 1.1;
         }
-        #timer-prayer-name { font-size: 2rem; margin-top: 4px; }
+        #timer-prayer-name { font-size: var(--next-prayer-font)!important; margin-top: 4px; }
         .swedish-text { display: block; font-size: 0.6em; color: #969fa3; margin-top: 2px; }
 
         .prayer-cards-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            width: 92%;
-            margin-top: 12px;
+            gap: var(--card-gap);
+            width: var(--cards-width);
+            margin-top: var(--cards-offset);
             padding-bottom: 12px;
         }
         .prayer-row {
             display: flex;
-            gap: 8px;
+            gap: var(--card-gap);
             width: 100%;
         }
         .prayer-card {
@@ -120,9 +121,9 @@
             justify-content: center;
             transition: background-color 0.4s ease, transform 0.4s ease, box-shadow 0.4s ease;
         }
-        .prayer-name { color: #fff; font-size: 1.25rem; font-weight: bold; margin-bottom: 2px; }
-        .swedish-name { color: #aaa; font-size: 0.75rem; margin-bottom: 6px; text-transform: capitalize; }
-        .prayer-time { color: #fff; font-size: 1.15rem; font-weight: bold; margin-bottom: 8px; }
+        .prayer-name { color: #fff; font-size: var(--prayer-name-font); font-weight: bold; margin-bottom: 2px; }
+        .swedish-name { color: #aaa; font-size: var(--swedish-name-font); margin-bottom: 6px; text-transform: capitalize; }
+        .prayer-time { color: #fff; font-size: var(--prayer-time-font); font-weight: bold; margin-bottom: 8px; }
 
         .iqama-box {
             background: rgba(255, 202, 40, 0.1);
@@ -131,8 +132,8 @@
             border-radius: 8px;
             margin-top: auto;
         }
-        .iqama-label { color: #ffca28; font-size: 0.6rem; display: block; opacity: 0.8; }
-        .iqama-time { color: #ffca28; font-size: 1rem; font-weight: bold; }
+        .iqama-label { color: #ffca28; font-size: var(--iqama-label-font); display: block; opacity: 0.8; }
+        .iqama-time { color: #ffca28; font-size: var(--iqama-time-font); font-weight: bold; }
 
         .active-card {
             border: 2px solid #ffca28 !important;
@@ -819,6 +820,8 @@
         };
         initializeApp(firebaseConfig);
     </script>
+    <script src="config.js"></script>
+    <script src="screen-layout.js"></script>
 </div>
 </body>
 </html>
