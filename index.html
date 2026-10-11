@@ -629,7 +629,7 @@
             const now  = new Date();
             const base = getTodayData();
             if (!base) return null;
-            if (!isSummerPeriod(now)) return base;
+            if (window.alkhaleelRemoteReady || !isSummerPeriod(now)) return base;
             return Object.assign({}, base, {
                 'Ishâ': addMinutes(base.Maghrib, 60),
                 'Fajr': addMinutes(base.Shuruq, -90)
@@ -640,6 +640,17 @@
             return isSummerPeriod(new Date())
                 ? { Fajr: 15, Duhur: 10, Asr: 10, Maghrib: 5, 'Ishâ': 5 }
                 : { Fajr: 10, Duhur: 10, Asr: 10, Maghrib: 5, 'Ishâ': 10 };
+        }
+
+        function getIqamaTime(day, prayer) {
+            const keys = { Fajr:'fajr', Duhur:'dhuhr', Asr:'asr', Maghrib:'maghrib', 'Ishâ':'isha' };
+            const date = day.Datum.slice(0,10);
+            const rule = (window.alkhaleelIqamaRules || []).find(r =>
+                r.prayer === keys[prayer] && r.valid_from <= date && r.valid_to >= date);
+            if (rule && rule.mode === 'fixed') return String(rule.value).slice(0,5);
+            const offset = rule && rule.mode === 'offset' ? Number(rule.value)
+                : window.alkhaleelRemoteReady ? 0 : (getIqamaOffsets()[prayer] || 0);
+            return calculateIqamaTime(day[prayer], offset);
         }
 
         const labels = {
@@ -721,7 +732,7 @@
                 if (iqamaEl) {
                     iqamaEl.innerText = (key === 'Shuruq')
                         ? '-'
-                        : calculateIqamaTime(times[key], offsets[key] ?? 0);
+                        : getIqamaTime(times, key);
                 }
 
                 if (cardEl) {
@@ -749,7 +760,8 @@
 
             for (let p of prayers) {
                 const pTime    = parseDateTime(p.data, p.t);
-                const iTime    = new Date(pTime.getTime() + p.i * 60000);
+                const prayerKey = Object.keys(labels).find(key => labels[key].ar === p.n);
+                const iTime    = parseDateTime(p.data, getIqamaTime(p.data, prayerKey));
                 const endGreen = new Date(iTime.getTime() + 5 * 60000);
 
                 if (now >= iTime && now < endGreen) { overlay.style.display = 'flex'; return; }
@@ -764,7 +776,7 @@
                              String(tmr.getDate()).padStart(2,'0') + " 00:00:00";
                 const tData = prayerData.find(d => d.Datum === tStr);
                 if (tData) {
-                    const adjTmr = isSummerPeriod(tmr)
+                    const adjTmr = !window.alkhaleelRemoteReady && isSummerPeriod(tmr)
                         ? Object.assign({}, tData, {
                             'Ishâ': addMinutes(tData.Maghrib, 60),
                             'Fajr': addMinutes(tData.Shuruq, -90)
@@ -821,7 +833,9 @@
         initializeApp(firebaseConfig);
     </script>
     <script src="config.js"></script>
+    <script src="remote-data.js?v=20261011-iqama-1"></script>
     <script src="screen-layout.js?v=20260923-2"></script>
 </div>
 </body>
 </html>
+
