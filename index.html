@@ -144,6 +144,23 @@
 
         .iqama-blink { animation: blinker 2.8s infinite; }
         @keyframes blinker { 50% { background-color: rgba(1, 0, 0, 0.5); } }
+
+        /* Lightweight screen: preserve geometry and admin layout variables. */
+        .prayer-card, .countdown-container {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+            transition: none !important;
+            background: rgba(25, 35, 40, .90);
+        }
+        .active-card { background: rgba(40, 50, 55, .96) !important; }
+        .top-left-logo img { filter: none; }
+        .countdown-time { text-shadow: none; }
+        .iqama-blink {
+            animation: none;
+            outline: 2px solid #ffca28;
+            outline-offset: -2px;
+        }
     </style>
 </head>
 <body>
@@ -698,18 +715,29 @@
         const fmtHijriSe = new Intl.DateTimeFormat('sv-SE', { calendar:'islamic-umalqura', day:'numeric', month:'long', year:'numeric' });
         const fmtClock   = new Intl.DateTimeFormat('en-GB', { hour:'2-digit', minute:'2-digit', hour12:false });
 
+        // Avoid rebuilding unchanged text and prayer labels every second.
+        function writeScreenValue(element, property, value) {
+            if (element && element[property] !== value) element[property] = value;
+        }
+        let lastClockMinute = '';
+        let lastClockDay = '';
+
         function updateClock() {
             const now = new Date();
-            document.getElementById('clock').innerText = fmtClock.format(now);
-
-            document.getElementById('date-ar').innerText = fmtDateAr.format(now);
-            document.getElementById('date-hijri').innerText = fmtHijriAr.format(now);
-
-            let sv = fmtDateSe.format(now);
-            document.getElementById('date-se').innerText = sv.charAt(0).toUpperCase() + sv.slice(1);
-
-            let hijSv = fmtHijriSe.format(now);
-            document.getElementById('date-hijri-se').innerText = hijSv.charAt(0).toUpperCase() + hijSv.slice(1);
+            const day = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+            const minute = `${day}-${now.getHours()}-${now.getMinutes()}`;
+            if (minute !== lastClockMinute) {
+                lastClockMinute = minute;
+                writeScreenValue(document.getElementById('clock'), 'innerText', fmtClock.format(now));
+            }
+            if (day === lastClockDay) return;
+            lastClockDay = day;
+            writeScreenValue(document.getElementById('date-ar'), 'innerText', fmtDateAr.format(now));
+            writeScreenValue(document.getElementById('date-hijri'), 'innerText', fmtHijriAr.format(now));
+            const sv = fmtDateSe.format(now);
+            writeScreenValue(document.getElementById('date-se'), 'innerText', sv.charAt(0).toUpperCase() + sv.slice(1));
+            const hijSv = fmtHijriSe.format(now);
+            writeScreenValue(document.getElementById('date-hijri-se'), 'innerText', hijSv.charAt(0).toUpperCase() + hijSv.slice(1));
         }
 
         function keyToId(key) {
@@ -727,16 +755,17 @@
                 const iqamaEl = document.getElementById(`${id}-iqama`);
                 const cardEl  = document.getElementById(`card-${id}`);
 
-                if (timeEl)  timeEl.innerText = times[key] || '--:--';
+                writeScreenValue(timeEl, 'innerText', times[key] || '--:--');
 
                 if (iqamaEl) {
-                    iqamaEl.innerText = (key === 'Shuruq')
-                        ? '-'
-                        : getIqamaTime(times, key);
+                    writeScreenValue(iqamaEl, 'innerText', key === 'Shuruq' ? '-' : getIqamaTime(times, key));
                 }
 
                 if (cardEl) {
-                    cardEl.classList.toggle('active-card', labels[key].ar === nextPrayerNameGlobal);
+                    const active = labels[key].ar === nextPrayerNameGlobal;
+                    if (cardEl.classList.contains('active-card') !== active) {
+                        cardEl.classList.toggle('active-card', active);
+                    }
                 }
             }
         }
@@ -764,7 +793,7 @@
                 const iTime    = parseDateTime(p.data, getIqamaTime(p.data, prayerKey));
                 const endGreen = new Date(iTime.getTime() + 5 * 60000);
 
-                if (now >= iTime && now < endGreen) { overlay.style.display = 'flex'; return; }
+                if (now >= iTime && now < endGreen) { writeScreenValue(overlay.style, 'display', 'flex'); return; }
                 if (now < pTime) { target = pTime; nameAr = p.n; nameSv = p.sv; mode = "اذان";  break; }
                 if (now < iTime) { target = iTime; nameAr = p.n; nameSv = p.sv; mode = "اقامة"; break; }
             }
@@ -787,21 +816,21 @@
                 }
             }
 
-            overlay.style.display = 'none';
+            writeScreenValue(overlay.style, 'display', 'none');
             if (target) {
                 nextPrayerNameGlobal = nameAr;
                 const diff = target - now;
                 const hh = String(Math.floor(diff / 3600000)).padStart(2,'0');
                 const mm = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
                 const ss = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
-                document.getElementById('timer').innerText = `${hh}:${mm}:${ss}`;
-                document.getElementById('timer-label').innerHTML =
+                writeScreenValue(document.getElementById('timer'), 'innerText', `${hh}:${mm}:${ss}`);
+                writeScreenValue(document.getElementById('timer-label'), 'innerHTML',
                     (mode === "اذان" ? "المتبقي للأذان" : "المتبقي للإقامة") +
-                    ` <span class="swedish-text">${mode === "اذان" ? "Tid till Adhan" : "Tid till Iqama"}</span>`;
-                document.getElementById('timer-prayer-name').innerHTML =
-                    `${nameAr} <span class="swedish-text">${nameSv}</span>`;
-                document.getElementById('timer-box').className =
-                    "countdown-container" + (mode === "اقامة" ? " iqama-blink" : "");
+                    ` <span class="swedish-text">${mode === "اذان" ? "Tid till Adhan" : "Tid till Iqama"}</span>`);
+                writeScreenValue(document.getElementById('timer-prayer-name'), 'innerHTML',
+                    `${nameAr} <span class="swedish-text">${nameSv}</span>`);
+                writeScreenValue(document.getElementById('timer-box'), 'className',
+                    "countdown-container" + (mode === "اقامة" ? " iqama-blink" : ""));
             }
         }
 
@@ -838,4 +867,5 @@
 </div>
 </body>
 </html>
+
 
